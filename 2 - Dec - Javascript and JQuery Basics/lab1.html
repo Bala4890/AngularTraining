@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <title>Angular Training</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <!-- Develop a AJAX Call using JavaScript’s XHR Object, and 
+             demonstrate the asynchronous behaviour with appropriate Success and Failure Response. 
+             Please use any server like Tomcat/IIS to perform AJAX Function Calls -->
+    </head>
+    <body onload="load()">
+        <script>
+                function fetchImage(option){
+                    console.log(option)
+                    if(option && option.selectedOptions[0]){
+                        var res, err, url = 'http://localhost:3333/image?location=' + option.selectedOptions[0].value
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function(code,status){
+                            if(xhr.readyState === XMLHttpRequest.DONE){
+                               if (xhr.status === 200) {
+                                    res = JSON.parse(xhr.responseText) ? JSON.parse(xhr.responseText).url : ''
+                                    console.log('res => ',res)
+                                    document.getElementById('errorHolder').innerHTML = '';
+                                    document.getElementById('imageHolder').src = res;
+                                } else if (xhr.status === 404) {
+                                    err = JSON.parse(xhr.responseText) ? JSON.parse(xhr.responseText).error: ''
+                                    console.log('res => ',res)
+                                    document.getElementById('imageHolder').src = '';
+                                    document.getElementById('errorHolder').innerHTML = 'Error in fetching image !!!!' + err;
+                                }
+                            } 
+                        };
+                        xhr.open('GET',url)
+                        xhr.send();
+                    }
+                    
+                }
+                function load(){
+                    $('#feedbackholder').html('')
+                    $( "#weather" ).click(function(){
+                        var cityName = $('select').find(":selected").text()
+                        var url = 'http://localhost:3333/weather?location='+cityName
+
+                        $.get(url, function(res) {
+                            console.log('res => ',res)
+                            if(res && !res.error){
+                                $('#temperature').html(res.temp)
+                                $('#humidity').html(res.humidity)
+                                $('#weatherlist').show()
+                            } else if(res.error) {
+                                $('#weatherlist').hide()
+                                $('#weathererror').html(res.error)
+                                $('#weathererror').show()
+                            }
+                        })
+                        .fail(function(err) {
+                            $('#weatherlist').hide()
+                            $('#weathererror').html('Something went wrong :(')
+                            $('#weathererror').show()
+                        });
+                        // $.ajax(requestparams)
+                    });
+
+                    $( "button.feedback" ).click(function(){
+                        //console.log('this => ',this)
+                        var cityName = $('select').find(":selected").text()
+                        var url = 'http://localhost:3333/feedback'
+                        var liked = this.textContent === 'Like' ? 'true' : (this.textContent === 'Unlike' ? 'false' : '')
+                        //console.log('feeback')
+                        var data = {
+                            liked : liked,
+                            cityName : cityName
+                        }
+
+                        $.post(url, data, function(res) {
+                            if(res){
+                                $('#feedbackholder').html(res)
+                            }
+                        })
+                        .fail(function(err) {
+                            if(res){
+                                $('#feedbackholder').html(err)
+                            }
+                        });
+                    });
+                }
+
+                
+                
+        </script>
+        <div>
+            <h3> Lab Activity - 1 </h3>
+            <h5> Develop a AJAX Call using JavaScript’s XHR Object, and 
+                    demonstrate the asynchronous behaviour with appropriate Success and Failure Response. 
+                    Please use any server like Tomcat/IIS to perform AJAX Function Calls </h5>
+            <h3> Lab Activity - 2 </h3>
+            <h5>
+                <ol>
+                    <li>
+                        Demonstrate ID, Element & Class base selectors, and perform DOM manipulation such as Text Change, Class Change
+                    </li>
+                    <li>
+                        Use jQuery AJAX Capabilities to perform POST and GET Operations, and demonstrate the success & failure handle.
+                    </li>
+                </ol> 
+            </h5>
+            ------------------------------------------------------------------------------------------------------
+            <div>
+                Choose City => <select onchange="fetchImage(this)">
+                    <option value="Chennai">Chennai</option>
+                    <option value="London">London</option>
+                    <option value="Tokyo">Tokyo</option>
+                    <option value="Moscow">Moscow</option>
+                    <option value="California">California</option>
+                    <option value="Sydney">Sydney</option>
+                </select>
+            </div><br>
+            <div>
+                <button id="weather" type="button">Click to get selected city's weather data</button><br><br>
+                <div id="weatherlist" style="display:none">Weather Details
+                    <ul>
+                        
+                        <li>
+                            Temperature => <span id="temperature"></span>
+                        </li>
+                        <li>
+                            Humidity => <span id="humidity"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div id="weathererror"></div><br>
+                Feedback ! Click if it was useful ?<br><br>
+                <button class="feedback" type="button">Like</button>
+                <button class="feedback" type="button">Unlike</button><br>
+                <div id="feedbackholder"></div>
+            </div><br>
+            <div id="errorHolder"></div><br>
+            <div style="height:500px;width:500px;display:flex;"><img id="imageHolder" src=""/></div>
+        </div>
+    </body>
+</html>
